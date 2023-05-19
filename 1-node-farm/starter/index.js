@@ -1,26 +1,26 @@
-const fs = require("fs");
-const http = require("http");
-const url = require("url");
-const slugify = require("slugify");
-const replaceTemplate = require("./modules/replaceTemplate.js");
+const fs = require('fs');
+const http = require('http');
+const url = require('url');
+const slugify = require('slugify');
+const replaceTemplate = require('./modules/replaceTemplate.js');
 
 ////////////////////////////////////
 // SERVER
 
 const tempOverview = fs.readFileSync(
   `${__dirname}/templates/template-overview.html`,
-  "utf-8"
+  'utf-8'
 );
 const tempCard = fs.readFileSync(
   `${__dirname}/templates/template-card.html`,
-  "utf-8"
+  'utf-8'
 );
 const tempProduct = fs.readFileSync(
   `${__dirname}/templates/template-product.html`,
-  "utf-8"
+  'utf-8'
 );
 
-const data = fs.readFileSync(`${__dirname}/dev-data/data.json`, "utf-8");
+const data = fs.readFileSync(`${__dirname}/dev-data/data.json`, 'utf-8');
 const dataObj = JSON.parse(data);
 
 const server = http.createServer((req, res) => {
@@ -28,21 +28,21 @@ const server = http.createServer((req, res) => {
   console.log(url.parse(req.url, true));
   const { query, pathname } = url.parse(req.url, true);
 
-  if (pathname === "/" || pathname === "/overview") {
+  if (pathname === '/' || pathname === '/overview') {
     res.writeHead(200, {
-      "Content-type": "text/html",
+      'Content-type': 'text/html',
     });
 
     const cardsHTML = dataObj
       .map((el) => replaceTemplate(tempCard, el))
-      .join("");
-    const output = tempOverview.replace("{%PRODUCT_CARDS%}", cardsHTML);
+      .join('');
+    const output = tempOverview.replace('{%PRODUCT_CARDS%}', cardsHTML);
     res.end(output);
 
     // Product Page
-  } else if (pathname === "/product") {
+  } else if (pathname === '/product') {
     res.writeHead(200, {
-      "Content-type": "text/html",
+      'Content-type': 'text/html',
     });
     const product = dataObj[query.id];
     const output = replaceTemplate(tempProduct, product);
@@ -52,14 +52,14 @@ const server = http.createServer((req, res) => {
     // 404
   } else {
     res.writeHead(404, {
-      "Content-type": "text/html",
-      "my-own-header": "hello-world",
+      'Content-type': 'text/html',
+      'my-own-header': 'hello-world',
     });
-    res.end("<h1>Page not found!</h1>");
+    res.end('<h1>Page not found!</h1>');
   }
 });
 
 // arguments = port, localhost, callback function
-server.listen(8000, "127.0.0.1", () => {
-  console.log("Listening to requests on port 8000");
+server.listen(8000, '127.0.0.1', () => {
+  console.log('Listening to requests on port 8000');
 });
