@@ -4,4 +4,4 @@
 1-node-farm/starter/.vscode/
 2-how-node-works/starter/.vscode/
 4-natours/starter/node_modules/
-4-natours/starter/dev-data/data/tours-simple.json
+4-natours/starter/config.env
