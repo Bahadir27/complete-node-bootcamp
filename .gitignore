@@ -5,3 +5,4 @@
 2-how-node-works/starter/.vscode/
 4-natours/starter/node_modules/
 4-natours/starter/config.env
+4-natours/starter/dev-data/data/tours-simple.json
