@@ -10,7 +10,6 @@ class APIFeatures {
     const excludedFields = ['page', 'sort', 'limit', 'fields'];
     excludedFields.forEach((field) => delete queryObj[field]);
 
-    // 1B) Advanced filtering
     let queryStr = JSON.stringify(queryObj);
     queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`);
 
@@ -30,7 +29,7 @@ class APIFeatures {
     return this;
   }
 
-  limiting() {
+  limitFields() {
     // 3) Field Limiting
     if (this.queryString.fields) {
       const fields = this.queryString.fields.split(',').join(' ');
