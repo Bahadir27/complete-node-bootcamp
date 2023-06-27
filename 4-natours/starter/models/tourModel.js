@@ -1,4 +1,6 @@
 const mongoose = require('mongoose');
+const slugify = require('slugify');
+// const validator = require('validator');
 
 const tourSchema = new mongoose.Schema(
   {
@@ -7,6 +9,9 @@ const tourSchema = new mongoose.Schema(
       required: true,
       unique: true,
       trim: true,
+      maxlength: [40, 'a tour name must be max 40 characters'],
+      minlength: [5, 'a tour name must be at least 5 characters'],
+      // validate: [validator.isAlpha, 'Tour name must only contain characters'],
     },
     slug: {
       type: String,
@@ -22,6 +27,10 @@ const tourSchema = new mongoose.Schema(
     difficulty: {
       type: String,
       required: [true, 'A tour must have a difficulty.'],
+      enum: {
+        values: ['easy', 'medium', 'difficult'],
+        message: 'Difficulty is either easy, medium, or difficult',
+      },
     },
     ratingsAverage: {
       type: Number,
@@ -35,7 +44,16 @@ const tourSchema = new mongoose.Schema(
       type: Number,
       required: [true, 'A tour must have a price'],
     },
-    priceDiscount: Number,
+    priceDiscount: {
+      type: Number,
+      validate: {
+        validator: function (val) {
+          // this will not work when updating the price but will work with creating new doc
+          return val < this.price;
+        },
+        message: 'priceDiscount({VALUE}) must be below priceDiscount',
+      },
+    },
     summary: {
       type: String,
       trim: true,
@@ -55,6 +73,10 @@ const tourSchema = new mongoose.Schema(
       select: false,
     },
     startDates: [Date],
+    secretTour: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     toJSON: { virtuals: true },
@@ -67,8 +89,32 @@ tourSchema.virtual('durationWeeks').get(function () {
 });
 
 // Document middlewareL runs before .save() and .create()
-tourSchema.pre('save', function () {
+tourSchema.pre('save', function (next) {
   this.slug = slugify(this.name, { lower: true });
+  next();
+});
+
+// tourSchema.post('save', function (doc, next) {
+//   console.log(doc);
+//   next();
+// });
+
+// Select the tours which is not 'secret'
+tourSchema.pre(/^find/, function (next) {
+  this.find({ secretTour: { $ne: true } });
+  this.start = Date.now();
+  next();
+});
+
+tourSchema.post(/^find/, function (docs, next) {
+  console.log(`Query took ${Date.now() - this.start} miliseconds`);
+  next();
+});
+
+// Aggregation.middleware
+tourSchema.pre('aggregate', function (next) {
+  this.pipeline().unshift({ $match: { secretTour: { $ne: true } } });
+  console.log(this.pipeline());
   next();
 });
 
