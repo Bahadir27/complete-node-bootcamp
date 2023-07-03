@@ -8,6 +8,11 @@ const userRouter = require('./routes/userRoutes');
 
 const app = express();
 
+const myLogger = function (req, res, next) {
+  console.log('---------- - ----------');
+  next();
+};
+
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
@@ -16,6 +21,7 @@ app.use(express.json());
 
 app.use(express.static(path.join(__dirname, 'public')));
 
+app.use(myLogger);
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
 
