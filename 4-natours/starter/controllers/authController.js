@@ -70,7 +70,7 @@ exports.protect = catchAsync(async (req, res, next) => {
   // 3) Check if the user who's trying to access the route still exists
   const freshUser = await User.findById(decoded.id);
 
-  if (freshUser)
+  if (!freshUser)
     return next(
       new AppError('The user belonging to this token does no longer exist', 401)
     );
