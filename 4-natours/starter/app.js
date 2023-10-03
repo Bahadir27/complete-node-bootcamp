@@ -1,6 +1,6 @@
+const path = require('path');
 const express = require('express');
 const morgan = require('morgan');
-const path = require('path');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const mongoSanitize = require('express-mongo-sanitize');
@@ -11,8 +11,13 @@ const AppError = require('./utils/appError');
 const globalErrorHandler = require('./controllers/errorController');
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
+const reviewRouter = require('./routes/reviewRoutes');
 
 const app = express();
+// app.engine('pug', require('pug').__express);
+
+app.set('view engine', 'pug');
+app.set('views', path.join(__dirname, 'views'));
 
 const myLogger = function (req, res, next) {
   console.log('---------- - ----------');
@@ -20,6 +25,9 @@ const myLogger = function (req, res, next) {
 };
 
 // 1) GLBAL MIDDLEWARES
+// Serving static files
+app.use(express.static(path.join(__dirname, 'public')));
+
 // SET security HTTP headers
 app.use(helmet());
 
@@ -51,14 +59,16 @@ app.use(
   })
 );
 
-// Serving static files
-app.use(express.static(path.join(__dirname, 'public')));
-
 app.use(myLogger);
 
 // 3) ROUTES
+app.get('/', (req, res) => {
+  res.status(200).render('base');
+});
+
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
+app.use('/api/v1/reviews', reviewRouter);
 
 app.all('*', (req, res, next) => {
   next(new AppError(`Con't find ${req.originalUrl} on the server!`, 404));
